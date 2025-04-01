@@ -18,16 +18,12 @@ services:
       retries: 5
     command: >
       bash -c "
-        # Iniciar PostgreSQL
         docker-entrypoint.sh postgres &
-        # Esperar a que PostgreSQL esté listo
         until pg_isready -U postgres; do sleep 1; done;
-        # Configurar Citus (añadir workers) una vez que estén listos
-        sleep 10; # Dar tiempo a los workers para iniciar
+        sleep 10;
         psql -U postgres -c \"SELECT citus_add_node('worker1', 5432);\"
         psql -U postgres -c \"SELECT citus_add_node('worker2', 5432);\"
         echo 'Citus coordinator configured.'
-        # Mantener el contenedor corriendo esperando la señal de postgres
         wait
       "
     depends_on:
